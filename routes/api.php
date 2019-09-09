@@ -17,10 +17,13 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::get('libraries', 'LibraryController@index');
-Route::group(['prefix' => 'library'], function() {
-	Route::post('create', 'LibraryController@create');
-	Route::get('edit/{id}', 'LibraryController@edit');
-	Route::patch('update/{id}', 'LibraryController@update');
-	Route::delete('delete/{id}', 'LibraryController@destroy');
+Route::middleware(['auth:api'])->group(function() {
+	Route::get('libraries', 'API\LibraryController@index');
+	Route::group(['prefix' => 'library'], function() {
+		Route::post('create', 'API\LibraryController@create');
+		Route::get('edit/{id}', 'API\LibraryController@edit');
+		Route::patch('update/{id}', 'API\LibraryController@update');
+		Route::delete('delete/{id}', 'API\LibraryController@destroy');
+	});
 });
+

@@ -18,6 +18,9 @@ Route::get('/', function () {
 Auth::routes();
 
 Route::get('/home', 'HomeController@index')->name('home');
-Route::get('/test-vue/{any?}', function() {
-	return view('test-vue');
-})->where('any', '.*');
+Route::middleware('auth')->group(function() {
+	Route::get('/test-vue/{any?}', function() {
+		return view('test-vue');
+	})->where('any', '.*');
+});
+

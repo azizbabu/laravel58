@@ -10,5 +10,11 @@ class Library extends Model
     use SoftDeletes;
 
     protected $dates = ['deleted_at'];
-    protected $fillable = ['title', 'owner'];
+
+    protected $guarded = [];
+
+    public function user()
+    {
+    	return $this->belongsTo(User::class);
+    }
 }

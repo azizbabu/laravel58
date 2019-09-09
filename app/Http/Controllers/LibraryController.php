@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Library;
 use Illuminate\Http\Request;
+use App\Http\Resource\Library as LibraryResource;
+use App\Http\Resource\LibraryCollection;
 
 class LibraryController extends Controller
 {
@@ -14,9 +16,12 @@ class LibraryController extends Controller
      */
     public function index()
     {
-        $libraries = Library::all()->toArray();
+        // $libraries = Library::all()->toArray();
 
-        return response()->json($libraries);
+        // return response()->json($libraries);
+        // $libraries = Library::whereUserId(request()->user()->id)->get();
+        dd(\Auth::user());
+        // return new LibraryCollection($libraries);
     }
 
     /**
@@ -26,6 +31,7 @@ class LibraryController extends Controller
      */
     public function create()
     {
+        dd($request->all());
         $library = new Library(request()->all());
         $library->save();
 
