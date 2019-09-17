@@ -13,6 +13,9 @@
 					<li class="nav-item">
 						<router-link to="/add" class="nav-item nav-link">Add Library</router-link>
 					</li>
+					<li class="nav-item">
+						<router-link to="/companies" class="nav-item nav-link">Company List</router-link>
+					</li>
 				</ul>
 			</div>
 		</nav>

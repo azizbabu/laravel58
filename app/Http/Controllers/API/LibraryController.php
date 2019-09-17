@@ -18,9 +18,6 @@ class LibraryController extends Controller
      */
     public function index()
     {
-        // $libraries = Library::all()->toArray();
-
-        // return response()->json($libraries);
         $libraries = Library::whereUserId(request()->user()->id)->get();
 
         return new LibraryCollection($libraries);

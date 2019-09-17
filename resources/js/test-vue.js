@@ -25,6 +25,7 @@ import VueCkeditor from 'vue-ckeditor2';
 // import VueSelect from 'vue-select'
 import Toasted from 'vue-toasted';
 import Datepicker from 'vuejs-datepicker';
+import {store} from './store/store'
 import {routes} from './routes'
 // Vue.component('v-select', VueSelect.VueSelect);
 Vue.use(axios)
@@ -35,11 +36,12 @@ Vue.use(VueRouter)
 
 const router = new VueRouter({
 	// mode:'history',
-	routes:routes
+	routes, // short for `routes: routes`
 })
 
 const app = new Vue({
     el: '#app',
-    router: router,
+    router,
+    store,
     render: h => h(App)
 });

@@ -32,7 +32,12 @@
 					</div>
 					<div class="form-group">
                         <label for="library-types">Library Types:</label>
-                        <v-select placeholder="Select a Library Type" v-model="library.type" :options="libraryTypes" selected="library.type" :reduce="label => label.code" label="label"></v-select>
+                        <v-select placeholder="Select a Library Type" v-model="selectedType" :options="libraryTypes" :value="selectedType" :reduce="label => label.code" label="label">
+							<template slot="option" slot-scope="option">
+								<span v-html="option.valueNoImage"></span>
+								{{ option.label }}
+							</template>
+						</v-select>
 						<div v-if="errors.type" class="text-danger">
 							{{ errors.type[0] }}
 						</div>
@@ -68,6 +73,8 @@
 				],
 				isLoading:true,
 				errors:[],
+				fetchType:'',
+				selectedType:null
 			}
 		},
 		components: {
@@ -81,6 +88,12 @@
 			axios.get(`${siteUrl}/api/library/edit/${this.$route.params.id}`)
 				 .then((response) => {
 				 	this.library = response.data
+					 setTimeout(function() {
+						 this.fetchType = response.data.type
+						 this.selectedType = this.fetchType
+						 console.log(this.selectedType)
+					 },2000);
+					
 				 })
 				 .catch(error => {
 						this.$toasted.error(error,{

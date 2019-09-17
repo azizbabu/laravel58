@@ -1,6 +1,7 @@
 import AllLibraries from './components/libraries/AllLibraries.vue'
 import AddLibrary from './components/libraries/AddLibrary.vue'
 import EditLibrary from './components/libraries/EditLibrary.vue'
+import Companies from './components/Companies.vue'
 
 export const routes = [
 	{
@@ -17,5 +18,10 @@ export const routes = [
 		name:'edit',
 		path:'/edit/:id',
 		component:EditLibrary
-	}
+	},
+	{
+		name:'companies',
+		path:'/companies',
+		component:Companies
+	},
 ]

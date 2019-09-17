@@ -25,5 +25,6 @@ Route::middleware(['auth:api'])->group(function() {
 		Route::patch('update/{id}', 'API\LibraryController@update');
 		Route::delete('delete/{id}', 'API\LibraryController@destroy');
 	});
+	Route::apiResource('companies', 'API\CompanyController');
 });
 
