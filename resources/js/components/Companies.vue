@@ -23,8 +23,8 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <template v-if="companies.length">
-                        <tr v-for="company in companies" :key="company.id">
+                        <template v-if="companies.hasOwnProperty('data') && companies.data.length">
+                        <tr v-for="company in companies.data" :key="company.id">
                             <td>{{ company.name }}</td>
                             <td>{{ company.owner_name }}</td>
                             <td>{{ companyTypeList[company.type] }}</td>
@@ -44,7 +44,9 @@
                             </tr>
                         </template>
                     </tbody>
-                </table>
+				</table>
+				
+				<pagination :data="companies" @pagination-change-page="getCompanyList"></pagination>
             </div>
         </div>
 
@@ -134,7 +136,7 @@
 	export default {
 		data() {
 			return {
-				companies:[],
+				companies:{},
 				companyTypes: [
 					{label:'Type 1', code : 1},
 					{label:'Type 2', code : 2},
@@ -171,10 +173,33 @@
 		},
 		created() {
 			// const siteUrl = document.querySelector("meta[name='site-url']").getAttribute("content")
-			const siteUrl = this.$store.getters.getSiteUrl
-			axios.get(this.siteUrl + '/api/companies')
+			// const siteUrl = this.$store.getters.getSiteUrl
+			// axios.get(this.siteUrl + '/api/companies')
+			// 	  .then(response => {
+			// 	  	this.companies = response.data.data
+			// 	  })
+			// 	  .catch(error => {
+			// 			this.$toasted.error(error,{
+			// 				position: 'top-center',
+			// 				theme: 'bubble',
+			// 				duration: 10000,
+			// 				action : {
+			// 					text : 'Close',
+			// 					onClick : (e, toastObject) => {
+			// 						toastObject.goAway(0);
+			// 					}
+			// 				},
+			// 			});
+			// 		 })
+			// 	  .finally(() => this.isLoading = false)
+			this.getCompanyList()
+		},
+		methods: {
+			getCompanyList(page = 1) {
+				const siteUrl = this.$store.getters.getSiteUrl
+				axios.get(this.siteUrl + '/api/companies?page=' + page)
 				  .then(response => {
-				  	this.companies = response.data.data
+				  	this.companies = response.data
 				  })
 				  .catch(error => {
 						this.$toasted.error(error,{
@@ -190,8 +215,7 @@
 						});
 					 })
 				  .finally(() => this.isLoading = false)
-		},
-		methods: {
+			},
 			showCompanyCreateForm() {
 				this.isCompanyList = false
 				this.isAddCompany = true
@@ -368,7 +392,6 @@
 									},
 								});
 								this.resetCompanyData()
-								console.log(this.company)
 								this.isCompanyList = true
 								this.isAddCompany = false
 								this.errors = []

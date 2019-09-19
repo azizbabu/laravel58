@@ -32,7 +32,7 @@ Vue.use(axios)
 Vue.use(VueCkeditor);
 Vue.use(Toasted);
 Vue.use(VueRouter)
-
+Vue.component('pagination', require('laravel-vue-pagination'));
 
 const router = new VueRouter({
 	// mode:'history',

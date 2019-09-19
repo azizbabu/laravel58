@@ -22,7 +22,7 @@ class CompanyController extends Controller
      */
     private function getCompanies()
     {
-        return Company::whereUserId(request()->user()->id)->latest()->get();
+        return Company::whereUserId(request()->user()->id)->latest()->paginate(10);
     }
 
     /**
@@ -34,7 +34,8 @@ class CompanyController extends Controller
     {
         $companies = $this->getCompanies();
 
-        return new CompanyCollection($companies);
+        // return new CompanyCollection($companies);
+        return response()->json($companies);
     }
 
     /**
