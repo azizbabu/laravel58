@@ -32,7 +32,7 @@
 					</div>
 					<div class="form-group">
                         <label for="library-types">Library Types:</label>
-                        <v-select placeholder="Select a Library Type" v-model="selectedType" :options="libraryTypes" :value="selectedType" :reduce="label => label.code" label="label">
+                        <v-select placeholder="Select a Library Type" v-model="library.type" :options="libraryTypes"  :reduce="label => label.code" label="label">
 							<template slot="option" slot-scope="option">
 								<span v-html="option.valueNoImage"></span>
 								{{ option.label }}
@@ -66,6 +66,7 @@
 		data() {
 			return {
 				library:{},
+				currentLibrary:{},
 				libraryTypes:[
 					{label:'Type 1', code : 1},
 					{label:'Type 2', code : 2},
@@ -87,12 +88,13 @@
 			const siteUrl = document.querySelector("meta[name='site-url']").getAttribute("content")
 			axios.get(`${siteUrl}/api/library/edit/${this.$route.params.id}`)
 				 .then((response) => {
-				 	this.library = response.data
-					 setTimeout(function() {
-						 this.fetchType = response.data.type
-						 this.selectedType = this.fetchType
-						 console.log(this.selectedType)
-					 },2000);
+				 	this.currentLibrary = response.data
+					//  setTimeout(()=> {
+						 this.library = response.data
+						//  this.fetchType = response.data.type
+						//  this.selectedType = this.fetchType
+						//  console.log(this.selectedType)
+					//  },2000);
 					
 				 })
 				 .catch(error => {

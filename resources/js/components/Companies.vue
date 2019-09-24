@@ -29,7 +29,7 @@
                             <td>{{ company.owner_name }}</td>
                             <td>{{ companyTypeList[company.type] }}</td>
                             <td>{{ company.establish_date }}</td>
-                            <td>{{ company.created_at }}</td>
+                            <td>{{ formatDate(new Date(company.created_at), true) }}</td>
                             <td>
                                 <div class="btn-group" role="group">
                                     <button class="btn btn-sm btn-primary" @click.prevent="showEditForm(company.id)">Edit</button>
@@ -113,11 +113,11 @@
 							</template>
 						</div>		
 						<template v-if="isAddCompany">	
-							<button class="btn btn-primary" @click.prevent="addCompany">Add Company</button>
+							<button class="btn btn-primary" @click.prevent="addCompany" :disabled="readOnly">Add Company</button>
 							<button class="btn btn-danger" @click.prevent="isCompanyList=true">Back</button>
 						</template>
 						<template v-else>	
-							<button class="btn btn-primary" @click.prevent="editCompany">Edit Company</button>
+							<button class="btn btn-primary" @click.prevent="editCompany" :disabled="readOnly">Edit Company</button>
 							<button class="btn btn-danger" @click.prevent="isCompanyList=true">Back</button>
 						</template>
 					</form>
@@ -151,8 +151,8 @@
 				isLoading:true,
 				isCompanyList:true,
 				isAddCompany:false,
-				// company:{},
 				errors:[],
+				readOnly:false,
 				siteUrl:this.$store.getters.getSiteUrl
 			}
 		},
@@ -172,31 +172,10 @@
             'v-select':vSelect,
 		},
 		created() {
-			// const siteUrl = document.querySelector("meta[name='site-url']").getAttribute("content")
-			// const siteUrl = this.$store.getters.getSiteUrl
-			// axios.get(this.siteUrl + '/api/companies')
-			// 	  .then(response => {
-			// 	  	this.companies = response.data.data
-			// 	  })
-			// 	  .catch(error => {
-			// 			this.$toasted.error(error,{
-			// 				position: 'top-center',
-			// 				theme: 'bubble',
-			// 				duration: 10000,
-			// 				action : {
-			// 					text : 'Close',
-			// 					onClick : (e, toastObject) => {
-			// 						toastObject.goAway(0);
-			// 					}
-			// 				},
-			// 			});
-			// 		 })
-			// 	  .finally(() => this.isLoading = false)
 			this.getCompanyList()
 		},
 		methods: {
 			getCompanyList(page = 1) {
-				const siteUrl = this.$store.getters.getSiteUrl
 				axios.get(this.siteUrl + '/api/companies?page=' + page)
 				  .then(response => {
 				  	this.companies = response.data
@@ -227,16 +206,30 @@
 				this.company.logoObj = this.file
 				this.$store.commit('setCompany', this.company)
 			},
-			formatDate(date) {
-				var hours = date.getHours();
-				var minutes = date.getMinutes();
-				var ampm = hours >= 12 ? 'pm' : 'am';
+			formatDate(date, createdAt = false) {
+				const monthNames = ["January", "February", "March", "April", "May", "June",
+					"July", "August", "September", "October", "November", "December"
+				];
+
+				let years = date.getFullYear()
+				let months = date.getMonth()+1
+				months = months < 10 ? `0${months}` : months
+				let days = date.getDate()
+				days = days < 10 ? `0${days}` : days			
+				let hours = date.getHours();
+				let minutes = date.getMinutes();
+				let ampm = hours >= 12 ? 'pm' : 'am';
 				hours = hours % 12;
 				hours = hours ? hours : 12; // the hour '0' should be '12'
+				hours = hours < 10 ? '0'+hours : hours;
 				minutes = minutes < 10 ? '0'+minutes : minutes;
-				var strTime = hours + ':' + minutes + ' ' + ampm;
-				/* return date.getMonth()+1 + "/" + date.getDate() + "/" + date.getFullYear() + " " + strTime; */
-				return `${date.getFullYear()}-${date.getMonth()+1}-${date.getDate()}`
+				let strTime = hours + ':' + minutes + ' ' + ampm;
+				
+				if(createdAt) {
+					return `${days} ${monthNames[date.getMonth()]}, ${years} ${strTime}`
+				}
+
+				return `${years}-${months}-${days}`
 			},
 			resetCompanyData() {
 				this.company = {
@@ -253,9 +246,8 @@
 				this.$store.commit('setCompany', this.company)
 			},
 			addCompany() {
-				var _this = this
 				this.isLoading = true
-				const siteUrl = this.$store.getters.getSiteUrl
+				this.readOnly = true
 				
 				const formData = new FormData();
 				if(this.company.name) {
@@ -276,13 +268,11 @@
 				if(this.company.establish_date) {
 					formData.append('establish_date', this.formatDate((new Date(this.company.establish_date))));
 				}
-				// formData.append('logo', this.file);
 				formData.append('logo', this.company.logoObj);
 				
-				axios.post(`${siteUrl}/api/companies`,formData)
+				axios.post(`${this.siteUrl}/api/companies`,formData)
 					 .then(response => {
 						 if(response.data.success) {
-							 this.companies = response.data.companies.data;
 							 setTimeout(()=> {
 								this.$toasted.success(response.data.message,{
 									position: 'top-center',
@@ -299,6 +289,7 @@
 								this.isCompanyList = true
 								this.isAddCompany = false
 								this.errors = []
+								this.getCompanyList()
 							 }, 1000)
 						 }else {
 							 this.$toasted.error(response.data.message,{
@@ -331,11 +322,14 @@
 							});
 						}
 					 })
-					 .finally(() => this.isLoading = false)
+					 .finally(() => {
+						 this.isLoading = false
+						 this.readOnly = false
+					 })
 			},
 			showEditForm(companyId) {
 				let matchArr = []
-				matchArr = this.companies.filter(company => {
+				matchArr = this.companies.data.filter(company => {
 					return company.id === companyId ? company: ''
 				})
 				if(matchArr.length) {
@@ -348,10 +342,9 @@
 				this.errors = []
 			},
 			editCompany() {
-				var _this = this
 				this.isLoading = true
-				const siteUrl = this.$store.getters.getSiteUrl
-				
+				this.readOnly = true
+
 				const formData = new FormData();
 				if(this.company.name) {
 					formData.append('name', this.company.name);
@@ -371,14 +364,12 @@
 				if(this.company.establish_date) {
 					formData.append('establish_date', this.formatDate((new Date(this.company.establish_date))));
 				}
-				// formData.append('logo', this.file);
 				formData.append('logo', this.company.logoObj);
 				formData.append('_method', 'PATCH');
 				
-				axios.post(`${siteUrl}/api/companies/${this.company.id}`,formData,{ withCredentials: true })
+				axios.post(`${this.siteUrl}/api/companies/${this.company.id}`,formData,{ withCredentials: true })
 					 .then(response => {
 						 if(response.data.success) {
-							 this.companies = response.data.companies.data;
 							 setTimeout(()=> {
 								this.$toasted.success(response.data.message,{
 									position: 'top-center',
@@ -395,6 +386,7 @@
 								this.isCompanyList = true
 								this.isAddCompany = false
 								this.errors = []
+								this.getCompanyList()
 							 }, 1000)
 						 } else {
 							 this.$toasted.error(response.data.message,{
@@ -427,7 +419,10 @@
 							});
 						}
 					 })
-					 .finally(() => this.isLoading = false)
+					 .finally(() => {
+						 this.isLoading = false
+						 this.readOnly = false
+					  })
 			},
 			deleteCompany(id) {
 				let confirmMsg = confirm('Are you sure to delete this company?');
@@ -435,8 +430,7 @@
 					return;
 				}
 				this.isLoading = true
-				const siteUrl = this.$store.getters.getSiteUrl
-				axios.delete(`${siteUrl}/api/companies/${id}`)
+				axios.delete(`${this.siteUrl}/api/companies/${id}`)
 					 .then(response => {
 						 if(response.data.success) {
 							 this.$toasted.success(response.data.message,{
@@ -450,8 +444,8 @@
 										}
 									},
 							  });
-							 let i = this.companies.map(item => item.id).indexOf(id); // find index of your object
-					 		 this.companies.splice(i, 1) // remove one company with i index
+							 let i = this.companies.data.map(item => item.id).indexOf(id); // find index of your object
+					 		 this.companies.data.splice(i, 1) // remove one company with i index
 						 }else {
 							 this.$toasted.error(response.data.message,{
 									position: 'top-center',

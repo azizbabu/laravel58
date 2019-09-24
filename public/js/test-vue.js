@@ -1897,8 +1897,8 @@ __webpack_require__.r(__webpack_exports__);
       isLoading: true,
       isCompanyList: true,
       isAddCompany: false,
-      // company:{},
       errors: [],
+      readOnly: false,
       siteUrl: this.$store.getters.getSiteUrl
     };
   },
@@ -1918,38 +1918,17 @@ __webpack_require__.r(__webpack_exports__);
     'v-select': vue_select__WEBPACK_IMPORTED_MODULE_2___default.a
   },
   created: function created() {
-    // const siteUrl = document.querySelector("meta[name='site-url']").getAttribute("content")
-    // const siteUrl = this.$store.getters.getSiteUrl
-    // axios.get(this.siteUrl + '/api/companies')
-    // 	  .then(response => {
-    // 	  	this.companies = response.data.data
-    // 	  })
-    // 	  .catch(error => {
-    // 			this.$toasted.error(error,{
-    // 				position: 'top-center',
-    // 				theme: 'bubble',
-    // 				duration: 10000,
-    // 				action : {
-    // 					text : 'Close',
-    // 					onClick : (e, toastObject) => {
-    // 						toastObject.goAway(0);
-    // 					}
-    // 				},
-    // 			});
-    // 		 })
-    // 	  .finally(() => this.isLoading = false)
     this.getCompanyList();
   },
   methods: {
     getCompanyList: function getCompanyList() {
-      var _this2 = this;
+      var _this = this;
 
       var page = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
-      var siteUrl = this.$store.getters.getSiteUrl;
       axios.get(this.siteUrl + '/api/companies?page=' + page).then(function (response) {
-        _this2.companies = response.data;
+        _this.companies = response.data;
       })["catch"](function (error) {
-        _this2.$toasted.error(error, {
+        _this.$toasted.error(error, {
           position: 'top-center',
           theme: 'bubble',
           duration: 10000,
@@ -1961,7 +1940,7 @@ __webpack_require__.r(__webpack_exports__);
           }
         });
       })["finally"](function () {
-        return _this2.isLoading = false;
+        return _this.isLoading = false;
       });
     },
     showCompanyCreateForm: function showCompanyCreateForm() {
@@ -1976,17 +1955,28 @@ __webpack_require__.r(__webpack_exports__);
       this.$store.commit('setCompany', this.company);
     },
     formatDate: function formatDate(date) {
+      var createdAt = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+      var monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+      var years = date.getFullYear();
+      var months = date.getMonth() + 1;
+      months = months < 10 ? "0".concat(months) : months;
+      var days = date.getDate();
+      days = days < 10 ? "0".concat(days) : days;
       var hours = date.getHours();
       var minutes = date.getMinutes();
       var ampm = hours >= 12 ? 'pm' : 'am';
       hours = hours % 12;
       hours = hours ? hours : 12; // the hour '0' should be '12'
 
+      hours = hours < 10 ? '0' + hours : hours;
       minutes = minutes < 10 ? '0' + minutes : minutes;
       var strTime = hours + ':' + minutes + ' ' + ampm;
-      /* return date.getMonth()+1 + "/" + date.getDate() + "/" + date.getFullYear() + " " + strTime; */
 
-      return "".concat(date.getFullYear(), "-").concat(date.getMonth() + 1, "-").concat(date.getDate());
+      if (createdAt) {
+        return "".concat(days, " ").concat(monthNames[date.getMonth()], ", ").concat(years, " ").concat(strTime);
+      }
+
+      return "".concat(years, "-").concat(months, "-").concat(days);
     },
     resetCompanyData: function resetCompanyData() {
       this.company = {
@@ -2003,12 +1993,10 @@ __webpack_require__.r(__webpack_exports__);
       this.$store.commit('setCompany', this.company);
     },
     addCompany: function addCompany() {
-      var _this3 = this;
-
-      var _this = this;
+      var _this2 = this;
 
       this.isLoading = true;
-      var siteUrl = this.$store.getters.getSiteUrl;
+      this.readOnly = true;
       var formData = new FormData();
 
       if (this.company.name) {
@@ -2033,13 +2021,119 @@ __webpack_require__.r(__webpack_exports__);
 
       if (this.company.establish_date) {
         formData.append('establish_date', this.formatDate(new Date(this.company.establish_date)));
-      } // formData.append('logo', this.file);
-
+      }
 
       formData.append('logo', this.company.logoObj);
-      axios.post("".concat(siteUrl, "/api/companies"), formData).then(function (response) {
+      axios.post("".concat(this.siteUrl, "/api/companies"), formData).then(function (response) {
         if (response.data.success) {
-          _this3.companies = response.data.companies.data;
+          setTimeout(function () {
+            _this2.$toasted.success(response.data.message, {
+              position: 'top-center',
+              theme: 'bubble',
+              duration: 10000,
+              action: {
+                text: 'Close',
+                onClick: function onClick(e, toastObject) {
+                  toastObject.goAway(0);
+                }
+              }
+            });
+
+            _this2.resetCompanyData();
+
+            _this2.isCompanyList = true;
+            _this2.isAddCompany = false;
+            _this2.errors = [];
+
+            _this2.getCompanyList();
+          }, 1000);
+        } else {
+          _this2.$toasted.error(response.data.message, {
+            position: 'top-center',
+            theme: 'bubble',
+            duration: 10000,
+            action: {
+              text: 'Close',
+              onClick: function onClick(e, toastObject) {
+                toastObject.goAway(0);
+              }
+            }
+          });
+        }
+      })["catch"](function (error) {
+        if (error.response.status == 422) {
+          _this2.errors = error.response.data.errors;
+        } else {
+          _this2.$toasted.error(error, {
+            position: 'top-center',
+            theme: 'bubble',
+            duration: 10000,
+            action: {
+              text: 'Close',
+              onClick: function onClick(e, toastObject) {
+                toastObject.goAway(0);
+              }
+            }
+          });
+        }
+      })["finally"](function () {
+        _this2.isLoading = false;
+        _this2.readOnly = false;
+      });
+    },
+    showEditForm: function showEditForm(companyId) {
+      var matchArr = [];
+      matchArr = this.companies.data.filter(function (company) {
+        return company.id === companyId ? company : '';
+      });
+
+      if (matchArr.length) {
+        this.company = matchArr[0];
+        this.company.logoObj = '';
+        this.$store.commit('setCompany', this.company);
+        this.isCompanyList = false;
+        this.isAddCompany = false;
+      }
+
+      this.errors = [];
+    },
+    editCompany: function editCompany() {
+      var _this3 = this;
+
+      this.isLoading = true;
+      this.readOnly = true;
+      var formData = new FormData();
+
+      if (this.company.name) {
+        formData.append('name', this.company.name);
+      }
+
+      if (this.company.owner_name) {
+        formData.append('owner_name', this.company.owner_name);
+      }
+
+      if (this.company.owner_phone) {
+        formData.append('owner_phone', this.company.owner_phone);
+      }
+
+      if (this.company.address) {
+        formData.append('address', this.company.address);
+      }
+
+      if (this.company.type) {
+        formData.append('type', this.company.type);
+      }
+
+      if (this.company.establish_date) {
+        formData.append('establish_date', this.formatDate(new Date(this.company.establish_date)));
+      }
+
+      formData.append('logo', this.company.logoObj);
+      formData.append('_method', 'PATCH');
+      axios.post("".concat(this.siteUrl, "/api/companies/").concat(this.company.id), formData, {
+        withCredentials: true
+      }).then(function (response) {
+        if (response.data.success) {
           setTimeout(function () {
             _this3.$toasted.success(response.data.message, {
               position: 'top-center',
@@ -2058,6 +2152,8 @@ __webpack_require__.r(__webpack_exports__);
             _this3.isCompanyList = true;
             _this3.isAddCompany = false;
             _this3.errors = [];
+
+            _this3.getCompanyList();
           }, 1000);
         } else {
           _this3.$toasted.error(response.data.message, {
@@ -2089,85 +2185,41 @@ __webpack_require__.r(__webpack_exports__);
           });
         }
       })["finally"](function () {
-        return _this3.isLoading = false;
+        _this3.isLoading = false;
+        _this3.readOnly = false;
       });
     },
-    showEditForm: function showEditForm(companyId) {
-      var matchArr = [];
-      matchArr = this.companies.filter(function (company) {
-        return company.id === companyId ? company : '';
-      });
-
-      if (matchArr.length) {
-        this.company = matchArr[0];
-        this.company.logoObj = '';
-        this.$store.commit('setCompany', this.company);
-        this.isCompanyList = false;
-        this.isAddCompany = false;
-      }
-
-      this.errors = [];
-    },
-    editCompany: function editCompany() {
+    deleteCompany: function deleteCompany(id) {
       var _this4 = this;
 
-      var _this = this;
+      var confirmMsg = confirm('Are you sure to delete this company?');
+
+      if (!confirmMsg) {
+        return;
+      }
 
       this.isLoading = true;
-      var siteUrl = this.$store.getters.getSiteUrl;
-      var formData = new FormData();
-
-      if (this.company.name) {
-        formData.append('name', this.company.name);
-      }
-
-      if (this.company.owner_name) {
-        formData.append('owner_name', this.company.owner_name);
-      }
-
-      if (this.company.owner_phone) {
-        formData.append('owner_phone', this.company.owner_phone);
-      }
-
-      if (this.company.address) {
-        formData.append('address', this.company.address);
-      }
-
-      if (this.company.type) {
-        formData.append('type', this.company.type);
-      }
-
-      if (this.company.establish_date) {
-        formData.append('establish_date', this.formatDate(new Date(this.company.establish_date)));
-      } // formData.append('logo', this.file);
-
-
-      formData.append('logo', this.company.logoObj);
-      formData.append('_method', 'PATCH');
-      axios.post("".concat(siteUrl, "/api/companies/").concat(this.company.id), formData, {
-        withCredentials: true
-      }).then(function (response) {
+      axios["delete"]("".concat(this.siteUrl, "/api/companies/").concat(id)).then(function (response) {
         if (response.data.success) {
-          _this4.companies = response.data.companies.data;
-          setTimeout(function () {
-            _this4.$toasted.success(response.data.message, {
-              position: 'top-center',
-              theme: 'bubble',
-              duration: 10000,
-              action: {
-                text: 'Close',
-                onClick: function onClick(e, toastObject) {
-                  toastObject.goAway(0);
-                }
+          _this4.$toasted.success(response.data.message, {
+            position: 'top-center',
+            theme: 'bubble',
+            duration: 10000,
+            action: {
+              text: 'Close',
+              onClick: function onClick(e, toastObject) {
+                toastObject.goAway(0);
               }
-            });
+            }
+          });
 
-            _this4.resetCompanyData();
+          var i = _this4.companies.data.map(function (item) {
+            return item.id;
+          }).indexOf(id); // find index of your object
 
-            _this4.isCompanyList = true;
-            _this4.isAddCompany = false;
-            _this4.errors = [];
-          }, 1000);
+
+          _this4.companies.data.splice(i, 1); // remove one company with i index
+
         } else {
           _this4.$toasted.error(response.data.message, {
             position: 'top-center',
@@ -2182,72 +2234,7 @@ __webpack_require__.r(__webpack_exports__);
           });
         }
       })["catch"](function (error) {
-        if (error.response.status == 422) {
-          _this4.errors = error.response.data.errors;
-        } else {
-          _this4.$toasted.error(error, {
-            position: 'top-center',
-            theme: 'bubble',
-            duration: 10000,
-            action: {
-              text: 'Close',
-              onClick: function onClick(e, toastObject) {
-                toastObject.goAway(0);
-              }
-            }
-          });
-        }
-      })["finally"](function () {
-        return _this4.isLoading = false;
-      });
-    },
-    deleteCompany: function deleteCompany(id) {
-      var _this5 = this;
-
-      var confirmMsg = confirm('Are you sure to delete this company?');
-
-      if (!confirmMsg) {
-        return;
-      }
-
-      this.isLoading = true;
-      var siteUrl = this.$store.getters.getSiteUrl;
-      axios["delete"]("".concat(siteUrl, "/api/companies/").concat(id)).then(function (response) {
-        if (response.data.success) {
-          _this5.$toasted.success(response.data.message, {
-            position: 'top-center',
-            theme: 'bubble',
-            duration: 10000,
-            action: {
-              text: 'Close',
-              onClick: function onClick(e, toastObject) {
-                toastObject.goAway(0);
-              }
-            }
-          });
-
-          var i = _this5.companies.map(function (item) {
-            return item.id;
-          }).indexOf(id); // find index of your object
-
-
-          _this5.companies.splice(i, 1); // remove one company with i index
-
-        } else {
-          _this5.$toasted.error(response.data.message, {
-            position: 'top-center',
-            theme: 'bubble',
-            duration: 10000,
-            action: {
-              text: 'Close',
-              onClick: function onClick(e, toastObject) {
-                toastObject.goAway(0);
-              }
-            }
-          });
-        }
-      })["catch"](function (error) {
-        _this5.$toasted.error(error, {
+        _this4.$toasted.error(error, {
           position: 'top-center',
           theme: 'bubble',
           duration: 10000,
@@ -2259,7 +2246,7 @@ __webpack_require__.r(__webpack_exports__);
           }
         });
       })["finally"](function () {
-        return _this5.isLoading = false;
+        return _this4.isLoading = false;
       });
     }
   }
@@ -2676,6 +2663,7 @@ __webpack_require__.r(__webpack_exports__);
   data: function data() {
     return {
       library: {},
+      currentLibrary: {},
       libraryTypes: [{
         label: 'Type 1',
         code: 1
@@ -2703,12 +2691,12 @@ __webpack_require__.r(__webpack_exports__);
 
     var siteUrl = document.querySelector("meta[name='site-url']").getAttribute("content");
     axios.get("".concat(siteUrl, "/api/library/edit/").concat(this.$route.params.id)).then(function (response) {
-      _this2.library = response.data;
-      setTimeout(function () {
-        this.fetchType = response.data.type;
-        this.selectedType = this.fetchType;
-        console.log(this.selectedType);
-      }, 2000);
+      _this2.currentLibrary = response.data; //  setTimeout(()=> {
+
+      _this2.library = response.data; //  this.fetchType = response.data.type
+      //  this.selectedType = this.fetchType
+      //  console.log(this.selectedType)
+      //  },2000);
     })["catch"](function (error) {
       _this2.$toasted.error(error, {
         position: 'top-center',
@@ -5598,7 +5586,16 @@ var render = function() {
                             _vm._v(" "),
                             _c("td", [_vm._v(_vm._s(company.establish_date))]),
                             _vm._v(" "),
-                            _c("td", [_vm._v(_vm._s(company.created_at))]),
+                            _c("td", [
+                              _vm._v(
+                                _vm._s(
+                                  _vm.formatDate(
+                                    new Date(company.created_at),
+                                    true
+                                  )
+                                )
+                              )
+                            ]),
                             _vm._v(" "),
                             _c("td", [
                               _c(
@@ -5972,6 +5969,7 @@ var render = function() {
                             "button",
                             {
                               staticClass: "btn btn-primary",
+                              attrs: { disabled: _vm.readOnly },
                               on: {
                                 click: function($event) {
                                   $event.preventDefault()
@@ -6001,6 +5999,7 @@ var render = function() {
                             "button",
                             {
                               staticClass: "btn btn-primary",
+                              attrs: { disabled: _vm.readOnly },
                               on: {
                                 click: function($event) {
                                   $event.preventDefault()
@@ -6634,7 +6633,6 @@ var render = function() {
                   attrs: {
                     placeholder: "Select a Library Type",
                     options: _vm.libraryTypes,
-                    value: _vm.selectedType,
                     reduce: function(label) {
                       return label.code
                     },
@@ -6658,11 +6656,11 @@ var render = function() {
                     }
                   ]),
                   model: {
-                    value: _vm.selectedType,
+                    value: _vm.library.type,
                     callback: function($$v) {
-                      _vm.selectedType = $$v
+                      _vm.$set(_vm.library, "type", $$v)
                     },
-                    expression: "selectedType"
+                    expression: "library.type"
                   }
                 }),
                 _vm._v(" "),

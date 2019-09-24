@@ -34,8 +34,8 @@ class CompanyController extends Controller
     {
         $companies = $this->getCompanies();
 
-        // return new CompanyCollection($companies);
-        return response()->json($companies);
+        return new CompanyCollection($companies);
+        // return response()->json($companies);
     }
 
     /**
@@ -53,13 +53,10 @@ class CompanyController extends Controller
 
         $company = new Company($requestAll);
         
-        if($company->save()) {
-            $companies = new CompanyCollection($this->getCompanies());
-            
+        if($company->save()) {          
             return response()->json([
                 'success' => true,
-                'message' => 'Company successfully added',
-                'companies' => $companies
+                'message' => 'Company successfully added'
             ]);
         }
 
@@ -96,12 +93,9 @@ class CompanyController extends Controller
         $company->fill($requestAll);
         
         if($company->save()) {
-            $companies = new CompanyCollection($this->getCompanies());
-            
             return response()->json([
                 'success' => true,
-                'message' => 'Company successfully updated',
-                'companies' => $companies
+                'message' => 'Company successfully updated'
             ]);
         }
 
@@ -159,7 +153,6 @@ class CompanyController extends Controller
                 $image = $request->logo;
                 $name = (string) Str::uuid() . '.' . $image->extension();
                 
-
                 $image->move($destinationPath, $name);
 
                 return $name;
