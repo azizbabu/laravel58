@@ -27,6 +27,7 @@ import Toasted from 'vue-toasted';
 import Datepicker from 'vuejs-datepicker';
 import {store} from './store/store'
 import {routes} from './routes'
+import {siteUrlMain} from './config'
 // Vue.component('v-select', VueSelect.VueSelect);
 Vue.use(axios)
 Vue.use(VueCkeditor);
@@ -35,8 +36,10 @@ Vue.use(VueRouter)
 Vue.component('pagination', require('laravel-vue-pagination'));
 
 const router = new VueRouter({
-	// mode:'history',
-	routes, // short for `routes: routes`
+	mode:'history',
+    routes, // short for `routes: routes`
+    base: siteUrlMain + '/test-vue/',
+    fallback: true,
 })
 
 const app = new Vue({
