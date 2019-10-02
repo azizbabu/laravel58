@@ -26,5 +26,6 @@ Route::middleware(['auth:api'])->group(function() {
 		Route::delete('delete/{id}', 'API\LibraryController@destroy');
 	});
 	Route::apiResource('companies', 'API\CompanyController');
+	Route::apiResource('posts', 'API\PostController');
 });
 

@@ -16,6 +16,9 @@
 					<li class="nav-item">
 						<router-link to="/companies" class="nav-item nav-link">Company List</router-link>
 					</li>
+					<li class="nav-item">
+						<router-link to="/posts" class="nav-item nav-link">Post List</router-link>
+					</li>
 				</ul>
 			</div>
 		</nav>

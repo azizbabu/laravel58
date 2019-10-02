@@ -1,9 +1,8 @@
 <?php
 
-namespace App\Http\Requests\API\Companies;
+namespace App\Http\Requests\API\Posts;
 
 use Illuminate\Foundation\Http\FormRequest;
-use App\Company;
 
 class Update extends FormRequest
 {
@@ -14,9 +13,10 @@ class Update extends FormRequest
      */
     public function authorize()
     {
-        $company = $this->route('company');
+        $postId = $this->route('post');
+        $post = \App\Post::findOrFail($postId);
 
-        return $this->user()->can('update', $company);
+        return $this->user()->can('update', $post);
     }
 
     /**
@@ -27,11 +27,9 @@ class Update extends FormRequest
     public function rules()
     {
         return [
-            'name'  => 'required|string|max:255',
-            'owner_name'  => 'required|string|max:255',
+            'title'  => 'required|string|max:255',
             'type'  => 'required|integer|min:1',
-            'establish_date'  => 'required|date',
-            'logo'  => 'nullable|sometimes|image|mimes:jpg,jpeg,png,gif|max:2048',
+            'post_date'  => 'required|date',
         ];
     }
 }

@@ -16,11 +16,19 @@ export const store = new Vuex.Store({
             establish_date:'',
             logo:'',
             logoObj:''
+        },
+        post: {
+            id:'',
+            title:'',
+            content:'',
+            type:'',
+            post_date:''
         }
     },
     getters: {
         getSiteUrl: state => state.siteUrl,
         getCompany: state => state.company,
+        getPost: state => state.post,
     },
     mutations:{
         setCompany(state, company) {
@@ -33,6 +41,13 @@ export const store = new Vuex.Store({
             state.company.establish_date = company.establish_date;
             state.company.logo = company.logo;
             state.company.logoObj = company.logoObj;
+        },
+        setPost(state, post) {
+            state.post.id = post.id;
+            state.post.title = post.title;
+            state.post.type = post.type;
+            state.post.content = post.content;
+            state.post.post_date = post.post_date;
         }
     }
 })

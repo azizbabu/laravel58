@@ -2,6 +2,7 @@ import AllLibraries from './components/libraries/AllLibraries.vue'
 import AddLibrary from './components/libraries/AddLibrary.vue'
 import EditLibrary from './components/libraries/EditLibrary.vue'
 import Companies from './components/Companies.vue'
+import Posts from './components/Posts.vue'
 import NotFound from './components/pages/NotFound.vue'
 
 export const routes = [
@@ -24,6 +25,11 @@ export const routes = [
 		name:'companies',
 		path:'/companies',
 		component:Companies
+	},
+	{
+		name:'posts',
+		path:'/posts',
+		component:Posts
 	},
 	{
 		name:'404',
