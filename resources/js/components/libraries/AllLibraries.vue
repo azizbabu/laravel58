@@ -30,7 +30,7 @@
 						<td>
 							<div class="btn-group" role="group">
 								<router-link :to="{name:'edit', params:{ id:library.id } }" class="btn btn-primary">Edit</router-link>
-								<button class="btn btn-danger" @click="deleteLibrary(library.id)">Delete</button>
+								<button type="button" class="btn btn-danger" @click="deleteLibrary(library.id)">Delete</button>
 							</div>
 						</td>
 					</tr>

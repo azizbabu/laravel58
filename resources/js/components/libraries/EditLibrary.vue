@@ -49,7 +49,7 @@
 							{{ errors.establish_date[0] }}
 						</div>
                     </div>
-					<button class="btn btn-primary">Update Library</button>
+					<button type="button" class="btn btn-primary">Update Library</button>
 				</form>
 			</div>
 		</div>
@@ -84,7 +84,8 @@
             'v-select':vSelect,
             // VueCkeditor
         },
-		created() {
+		mounted() {
+			this.library = {}
 			const siteUrl = document.querySelector("meta[name='site-url']").getAttribute("content")
 			axios.get(`${siteUrl}/api/library/edit/${this.$route.params.id}`)
 				 .then((response) => {

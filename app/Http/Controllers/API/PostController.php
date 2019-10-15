@@ -3,9 +3,7 @@
 namespace App\Http\Controllers\API;
 
 use Illuminate\Http\Request;
-use App\Http\Requests\API\Posts\Store;
-use App\Http\Requests\API\Posts\Update;
-use App\Http\Requests\API\Posts\Destroy;
+use App\Http\Requests\API\Posts\{ Store, Update, Destroy };
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Post as PostResource;
 use App\Http\Resources\PostCollection;

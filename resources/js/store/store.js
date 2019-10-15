@@ -48,6 +48,18 @@ export const store = new Vuex.Store({
             state.post.type = post.type;
             state.post.content = post.content;
             state.post.post_date = post.post_date;
-        }
+        },
+        setPostTitle(state, value) {
+            state.post.title = value;
+        },
+        setPostType(state, value) {
+            state.post.type = value;
+        },
+        setPostContent(state, value) {
+            state.post.content = value;
+        },
+        setPostDate(state, value) {
+            state.post.post_date = value;
+        },
     }
 })

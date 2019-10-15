@@ -2394,6 +2394,7 @@ __webpack_require__.r(__webpack_exports__);
   data: function data() {
     return {
       posts: {},
+      post: {},
       postTypes: [{
         label: 'Type 1',
         code: 1
@@ -2420,12 +2421,44 @@ __webpack_require__.r(__webpack_exports__);
     };
   },
   computed: {
-    post: {
+    // post:{
+    // 	get() {
+    // 		return this.$store.getters.getPost
+    // 	},
+    // 	set(post) {
+    // 		this.$store.commit('setPost', post)
+    // 	}
+    // },
+    title: {
       get: function get() {
-        return this.$store.getters.getPost;
+        return this.$store.getters.getPost.title;
       },
-      set: function set(post) {
-        this.$store.commit('setPost', post);
+      set: function set(value) {
+        this.$store.commit('setPostTitle', value);
+      }
+    },
+    type: {
+      get: function get() {
+        return this.$store.getters.getPost.type;
+      },
+      set: function set(value) {
+        this.$store.commit('setPostType', value);
+      }
+    },
+    content: {
+      get: function get() {
+        return this.$store.getters.getPost.content;
+      },
+      set: function set(value) {
+        this.$store.commit('setPostContent', value);
+      }
+    },
+    post_date: {
+      get: function get() {
+        return this.$store.getters.getPost.post_date;
+      },
+      set: function set(value) {
+        this.$store.commit('setPostDate', value);
       }
     }
   },
@@ -2490,20 +2523,28 @@ __webpack_require__.r(__webpack_exports__);
       return "".concat(years, "-").concat(months, "-").concat(days);
     },
     resetPostData: function resetPostData() {
-      this.post = {
-        id: '',
-        title: '',
-        content: '',
-        type: '',
-        post_date: ''
-      };
-      this.$store.commit('setPost', this.post);
+      // this.post = {
+      // 	id:'',
+      // 	title:'',
+      // 	content:'',
+      // 	type:'',
+      // 	post_date:''
+      // }
+      // this.$store.commit('setPost', this.post)
+      this.$store.commit('setPostTitle', '');
+      this.$store.commit('setPostType', '');
+      this.$store.commit('setPostContent', '');
+      this.$store.commit('setPostDate', '');
     },
     addPost: function addPost() {
       var _this2 = this;
 
       this.isLoading = true;
       this.readOnly = true;
+      this.post.title = this.title;
+      this.post.type = this.type;
+      this.post.content = this.content;
+      this.post.post_date = this.post_date;
       axios.post("".concat(this.siteUrl, "/api/posts"), this.post).then(function (response) {
         if (response.data.success) {
           setTimeout(function () {
@@ -2565,30 +2606,43 @@ __webpack_require__.r(__webpack_exports__);
       this.post.type = value;
       this.$store.commit('setPost', this.post);
     },
+    setSelectedType: function setSelectedType(value) {
+      this.$store.commit('setPostType', value);
+    },
     showEditForm: function showEditForm(postId) {
-      var matchArr = [];
-      matchArr = this.posts.data.filter(function (post) {
-        return post.id === postId ? post : '';
+      var postItem = this.posts.data.find(function (post) {
+        return post.id === postId;
       });
 
-      if (matchArr.length) {
-        this.currentPost = matchArr[0];
-        this.post = this.currentPost;
-        this.$store.commit('setPost', this.post);
+      if (Object.keys(postItem).length && postItem.constructor === Object) {
+        this.currentPost = postItem;
+        this.post.id = this.currentPost.id;
+        this.post.title = this.currentPost.title;
+        this.post.type = this.currentPost.type;
+        this.post.content = this.currentPost.content;
+        this.post.post_date = this.currentPost.post_date; // this.$store.commit('setPost', this.post)
+
+        this.$store.commit('setPostTitle', this.post.title);
+        this.$store.commit('setPostType', this.post.type);
+        this.$store.commit('setPostContent', this.post.content);
+        this.$store.commit('setPostDate', this.post.post_date);
         this.isAddPost = false;
         $('#postModal').modal();
       }
 
       this.errors = [];
     },
-    updated: function updated() {
-      this.$store.commit('setPost', this.post);
+    updated: function updated() {// this.$store.commit('setPost', this.post)
     },
     editPost: function editPost() {
       var _this3 = this;
 
       this.isLoading = true;
       this.readOnly = true;
+      this.post.title = this.title;
+      this.post.type = this.type;
+      this.post.content = this.content;
+      this.post.post_date = this.post_date;
       axios.patch("".concat(this.siteUrl, "/api/posts/").concat(this.post.id), this.post).then(function (response) {
         if (response.data.success) {
           setTimeout(function () {
@@ -3145,9 +3199,10 @@ __webpack_require__.r(__webpack_exports__);
     'v-select': vue_select__WEBPACK_IMPORTED_MODULE_2___default.a // VueCkeditor
 
   },
-  created: function created() {
+  mounted: function mounted() {
     var _this2 = this;
 
+    this.library = {};
     var siteUrl = document.querySelector("meta[name='site-url']").getAttribute("content");
     axios.get("".concat(siteUrl, "/api/library/edit/").concat(this.$route.params.id)).then(function (response) {
       _this2.currentLibrary = response.data; //  setTimeout(()=> {
@@ -6058,6 +6113,7 @@ var render = function() {
               "button",
               {
                 staticClass: "btn btn-sm btn-info float-right",
+                attrs: { type: "button" },
                 on: {
                   click: function($event) {
                     $event.preventDefault()
@@ -6116,6 +6172,7 @@ var render = function() {
                                     "button",
                                     {
                                       staticClass: "btn btn-sm btn-primary",
+                                      attrs: { type: "button" },
                                       on: {
                                         click: function($event) {
                                           $event.preventDefault()
@@ -6130,6 +6187,7 @@ var render = function() {
                                     "button",
                                     {
                                       staticClass: "btn btn-sm btn-danger",
+                                      attrs: { type: "button" },
                                       on: {
                                         click: function($event) {
                                           $event.preventDefault()
@@ -6619,6 +6677,7 @@ var render = function() {
               "button",
               {
                 staticClass: "btn btn-sm btn-info float-right",
+                attrs: { type: "button" },
                 on: {
                   click: function($event) {
                     $event.preventDefault()
@@ -6767,8 +6826,8 @@ var render = function() {
                         {
                           name: "model",
                           rawName: "v-model",
-                          value: _vm.post.title,
-                          expression: "post.title"
+                          value: _vm.title,
+                          expression: "title"
                         }
                       ],
                       staticClass: "form-control",
@@ -6778,13 +6837,13 @@ var render = function() {
                         id: "name",
                         placeholder: "Enter Post Title"
                       },
-                      domProps: { value: _vm.post.title },
+                      domProps: { value: _vm.title },
                       on: {
                         input: function($event) {
                           if ($event.target.composing) {
                             return
                           }
-                          _vm.$set(_vm.post, "title", $event.target.value)
+                          _vm.title = $event.target.value
                         }
                       }
                     }),
@@ -6810,8 +6869,8 @@ var render = function() {
                         {
                           name: "model",
                           rawName: "v-model",
-                          value: _vm.post.content,
-                          expression: "post.content"
+                          value: _vm.content,
+                          expression: "content"
                         }
                       ],
                       staticClass: "form-control",
@@ -6822,13 +6881,13 @@ var render = function() {
                         placeholder: "Enter Post Content",
                         rows: "5"
                       },
-                      domProps: { value: _vm.post.content },
+                      domProps: { value: _vm.content },
                       on: {
                         input: function($event) {
                           if ($event.target.composing) {
                             return
                           }
-                          _vm.$set(_vm.post, "content", $event.target.value)
+                          _vm.content = $event.target.value
                         }
                       }
                     })
@@ -6852,13 +6911,13 @@ var render = function() {
                           },
                           label: "label"
                         },
-                        on: { input: _vm.setSelected },
+                        on: { input: _vm.setSelectedType },
                         model: {
-                          value: _vm.post.type,
+                          value: _vm.type,
                           callback: function($$v) {
-                            _vm.$set(_vm.post, "type", $$v)
+                            _vm.type = $$v
                           },
-                          expression: "post.type"
+                          expression: "type"
                         }
                       }),
                       _vm._v(" "),
@@ -6890,11 +6949,11 @@ var render = function() {
                           placeholder: "YYYY-MM-DD"
                         },
                         model: {
-                          value: _vm.post.post_date,
+                          value: _vm.post_date,
                           callback: function($$v) {
-                            _vm.$set(_vm.post, "post_date", $$v)
+                            _vm.post_date = $$v
                           },
-                          expression: "post.post_date"
+                          expression: "post_date"
                         }
                       }),
                       _vm._v(" "),
@@ -6931,7 +6990,7 @@ var render = function() {
                             "button",
                             {
                               staticClass: "btn btn-primary",
-                              attrs: { disabled: _vm.readOnly },
+                              attrs: { type: "button", disabled: _vm.readOnly },
                               on: {
                                 click: function($event) {
                                   $event.preventDefault()
@@ -6947,7 +7006,7 @@ var render = function() {
                             "button",
                             {
                               staticClass: "btn btn-primary",
-                              attrs: { disabled: _vm.readOnly },
+                              attrs: { type: "button", disabled: _vm.readOnly },
                               on: {
                                 click: function($event) {
                                   $event.preventDefault()
@@ -7242,9 +7301,11 @@ var render = function() {
               1
             ),
             _vm._v(" "),
-            _c("button", { staticClass: "btn btn-primary" }, [
-              _vm._v("Add Library")
-            ])
+            _c(
+              "button",
+              { staticClass: "btn btn-primary", attrs: { type: "button" } },
+              [_vm._v("Add Library")]
+            )
           ]
         )
       ])
@@ -7332,6 +7393,7 @@ var render = function() {
                             "button",
                             {
                               staticClass: "btn btn-danger",
+                              attrs: { type: "button" },
                               on: {
                                 click: function($event) {
                                   return _vm.deleteLibrary(library.id)
@@ -7646,9 +7708,11 @@ var render = function() {
               1
             ),
             _vm._v(" "),
-            _c("button", { staticClass: "btn btn-primary" }, [
-              _vm._v("Update Library")
-            ])
+            _c(
+              "button",
+              { staticClass: "btn btn-primary", attrs: { type: "button" } },
+              [_vm._v("Update Library")]
+            )
           ]
         )
       ])
@@ -26897,6 +26961,18 @@ var store = new vuex__WEBPACK_IMPORTED_MODULE_1__["default"].Store({
       state.post.type = post.type;
       state.post.content = post.content;
       state.post.post_date = post.post_date;
+    },
+    setPostTitle: function setPostTitle(state, value) {
+      state.post.title = value;
+    },
+    setPostType: function setPostType(state, value) {
+      state.post.type = value;
+    },
+    setPostContent: function setPostContent(state, value) {
+      state.post.content = value;
+    },
+    setPostDate: function setPostDate(state, value) {
+      state.post.post_date = value;
     }
   }
 });

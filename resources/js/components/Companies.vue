@@ -8,7 +8,7 @@
 
         <div v-if="isCompanyList" id="companyListArea">
             <h3>All Companies
-				<button class="btn btn-sm btn-info float-right" @click.prevent="showCompanyCreateForm">Add New</button>
+				<button type="button" class="btn btn-sm btn-info float-right" @click.prevent="showCompanyCreateForm">Add New</button>
 			</h3>
             <div class="table-responsive">
                 <table class="table table-bordered">
@@ -32,8 +32,8 @@
                             <td>{{ formatDate(new Date(company.created_at), true) }}</td>
                             <td>
                                 <div class="btn-group" role="group">
-                                    <button class="btn btn-sm btn-primary" @click.prevent="showEditForm(company.id)">Edit</button>
-                                    <button class="btn btn-sm btn-danger" @click.prevent="deleteCompany(company.id)">Delete</button>
+                                    <button type="button" class="btn btn-sm btn-primary" @click.prevent="showEditForm(company.id)">Edit</button>
+                                    <button type="button" class="btn btn-sm btn-danger" @click.prevent="deleteCompany(company.id)">Delete</button>
                                 </div>
                             </td>
                         </tr>

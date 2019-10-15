@@ -8,7 +8,7 @@
 
         <div v-if="isPostList" id="postListArea">
             <h3>All Posts
-				<button class="btn btn-sm btn-info float-right" @click.prevent="showPostCreateForm">Add New</button>
+				<button type="button" class="btn btn-sm btn-info float-right" @click.prevent="showPostCreateForm">Add New</button>
 			</h3>
             <div class="table-responsive">
                 <table class="table table-bordered">
@@ -66,28 +66,28 @@
                         <div class="modal-body"> 
                             <div class="form-group">
                                 <label for="name">Post Title</label>
-                                <input type="text" name="title" v-model="post.title" id="name" class="form-control" placeholder="Enter Post Title">
+                                <input type="text" name="title" v-model="title" id="name" class="form-control" placeholder="Enter Post Title">
                                 <div v-if="errors.title" class="text-danger">
                                     {{ errors.title[0] }}
                                 </div>
                             </div>
                             <div class="form-group">
                                 <label for="content">Content</label>
-                                <textarea type="text" name="content" v-model="post.content" id="content" class="form-control" placeholder="Enter Post Content" rows="5"></textarea>
+                                <textarea type="text" name="content" v-model="content" id="content" class="form-control" placeholder="Enter Post Content" rows="5"></textarea>
                                 <!-- <vue-ckeditor 
                                 v-model="post.address" 
                                 :config="config" /> -->
                             </div>
                             <div class="form-group">
                                 <label for="post-types">Post Types:</label>
-                                <v-select placeholder="Select a Post Type" v-model="post.type" :value="$store.getters.getPost.type"  @input="setSelected" :options="postTypes" :reduce="label => label.code" label="label"></v-select>
+                                <v-select placeholder="Select a Post Type" v-model="type" :value="$store.getters.getPost.type"  @input="setSelectedType" :options="postTypes" :reduce="label => label.code" label="label"></v-select>
                                 <div v-if="errors.type" class="text-danger">
                                     {{ errors.type[0] }}
                                 </div>
                             </div>
                             <div class="form-group">
                                 <label for="post_date">Posted Date:</label>
-                                <vuejs-datepicker v-model="post.post_date" input-class="form-control bg-light" format="yyyy-MM-dd" placeholder="YYYY-MM-DD"></vuejs-datepicker>
+                                <vuejs-datepicker v-model="post_date" input-class="form-control bg-light" format="yyyy-MM-dd" placeholder="YYYY-MM-DD"></vuejs-datepicker>
                                 <div v-if="errors.post_date" class="text-danger">
                                     {{ errors.post_date[0] }}
                                 </div>
@@ -97,10 +97,10 @@
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                             <template v-if="isAddPost">	
-                                <button class="btn btn-primary" @click.prevent="addPost" :disabled="readOnly">Add Post</button>
+                                <button  type="button" class="btn btn-primary" @click.prevent="addPost" :disabled="readOnly">Add Post</button>
                             </template>
                             <template v-else>	
-                                <button class="btn btn-primary" @click.prevent="editPost" :disabled="readOnly">Edit Post</button>
+                                <button  type="button" class="btn btn-primary" @click.prevent="editPost" :disabled="readOnly">Edit Post</button>
                             </template>  
                         </div>
                     </form>
@@ -122,6 +122,7 @@
 		data() {
 			return {
 				posts:{},
+				post:{},
 				postTypes: [
 					{label:'Type 1', code : 1},
 					{label:'Type 2', code : 2},
@@ -143,14 +144,46 @@
 			}
 		},
 		computed: {
-			post:{
+			// post:{
+			// 	get() {
+			// 		return this.$store.getters.getPost
+			// 	},
+			// 	set(post) {
+			// 		this.$store.commit('setPost', post)
+			// 	}
+			// },
+			title:{
 				get() {
-					return this.$store.getters.getPost
+					return this.$store.getters.getPost.title
 				},
-				set(post) {
-					this.$store.commit('setPost', post)
+				set(value) {
+					this.$store.commit('setPostTitle', value)
 				}
-			}
+			},
+			type:{
+				get() {
+					return this.$store.getters.getPost.type
+				},
+				set(value) {
+					this.$store.commit('setPostType', value)
+				}
+			},
+			content:{
+				get() {
+					return this.$store.getters.getPost.content
+				},
+				set(value) {
+					this.$store.commit('setPostContent', value)
+				}
+			},
+			post_date:{
+				get() {
+					return this.$store.getters.getPost.post_date
+				},
+				set(value) {
+					this.$store.commit('setPostDate', value)
+				}
+			},
 		},
 		components: {
 			ClipLoader,
@@ -212,19 +245,28 @@
 				return `${years}-${months}-${days}`
 			},
 			resetPostData() {
-				this.post = {
-					id:'',
-					title:'',
-					content:'',
-					type:'',
-					post_date:''
-				}
-				this.$store.commit('setPost', this.post)
+				// this.post = {
+				// 	id:'',
+				// 	title:'',
+				// 	content:'',
+				// 	type:'',
+				// 	post_date:''
+				// }
+				// this.$store.commit('setPost', this.post)
+				this.$store.commit('setPostTitle', '')
+				this.$store.commit('setPostType', '')
+				this.$store.commit('setPostContent', '')
+				this.$store.commit('setPostDate', '')
 			},
 			addPost() {
 				this.isLoading = true
 				this.readOnly = true
 				
+				this.post.title = this.title
+				this.post.type = this.type
+				this.post.content = this.content
+				this.post.post_date = this.post_date
+
 				axios.post(`${this.siteUrl}/api/posts`,this.post)
 					 .then(response => {
 						 if(response.data.success) {
@@ -285,28 +327,41 @@
             setSelected(value) {
                 this.post.type = value
                 this.$store.commit('setPost', this.post)
+			},
+			setSelectedType(value) {
+                this.$store.commit('setPostType', value)
             },
 			showEditForm(postId) {
-				let matchArr = []
-				matchArr = this.posts.data.filter(post => {
-					return post.id === postId ? post: ''
-				})
-				if(matchArr.length) {
-					this.currentPost = matchArr[0]
-					this.post = this.currentPost
-					this.$store.commit('setPost', this.post)
+				let postItem = this.posts.data.find(post => post.id === postId)
+				
+				if(Object.keys(postItem).length && postItem.constructor === Object) {
+					this.currentPost = postItem
+					this.post.id = this.currentPost.id
+					this.post.title = this.currentPost.title
+					this.post.type = this.currentPost.type
+					this.post.content = this.currentPost.content
+					this.post.post_date = this.currentPost.post_date
+					// this.$store.commit('setPost', this.post)
+					this.$store.commit('setPostTitle', this.post.title)
+					this.$store.commit('setPostType', this.post.type)
+					this.$store.commit('setPostContent', this.post.content)
+					this.$store.commit('setPostDate', this.post.post_date)
 					this.isAddPost = false
 					$('#postModal').modal()
 				}
 				this.errors = []
             },
             updated() {
-                this.$store.commit('setPost', this.post)
+                // this.$store.commit('setPost', this.post)
             },
 			editPost() {
 				this.isLoading = true
 				this.readOnly = true
-				
+				this.post.title = this.title
+				this.post.type = this.type
+				this.post.content = this.content
+				this.post.post_date = this.post_date
+
 				axios.patch(`${this.siteUrl}/api/posts/${this.post.id}`,this.post)
 					 .then(response => {
 						 if(response.data.success) {

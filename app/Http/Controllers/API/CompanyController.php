@@ -3,9 +3,7 @@
 namespace App\Http\Controllers\API;
 
 use Illuminate\Http\Request;
-use App\Http\Requests\API\Companies\Store;
-use App\Http\Requests\API\Companies\Update;
-use App\Http\Requests\API\Companies\Destroy;
+use App\Http\Requests\API\Companies\{ Store, Update, Destroy };
 use App\Http\Controllers\Controller;
 use App\Company;
 use App\Http\Resources\Company as CompanyResource;

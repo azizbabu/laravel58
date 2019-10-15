@@ -44,7 +44,7 @@
 							{{ errors.establish_date[0] }}
 						</div>
                     </div>
-					<button class="btn btn-primary">Add Library</button>
+					<button type="button" class="btn btn-primary">Add Library</button>
 				</form>
 			</div>
 		</div>
